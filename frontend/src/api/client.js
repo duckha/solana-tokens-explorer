@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Dev: VITE_API_URL is empty → Vite proxy handles /api/*
+// Prod same domain: VITE_API_URL is empty → nginx/caddy proxies /api/*
+// Prod different domain: VITE_API_URL=https://api.yourdomain.com
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: (import.meta.env.VITE_API_URL || '') + '/api',
   timeout: 20000,
 });
 

@@ -60,6 +60,73 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ---
 
+## Deploying to production
+
+### Option A — Same domain via nginx (recommended)
+
+Frontend and backend live on the same domain. nginx proxies `/api/*` to Express:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Frontend static files
+    root /var/www/solana-token-explorer/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API requests to backend
+    location /api/ {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+Backend `.env`:
+
+```
+FRONTEND_URL=https://yourdomain.com
+```
+
+Frontend — no extra config needed, `VITE_API_URL` stays empty.
+
+Build frontend:
+
+```bash
+cd frontend && npm run build
+```
+
+---
+
+### Option B — Different domains (e.g. frontend on Vercel, backend on VPS)
+
+**Backend `.env`:**
+
+```
+FRONTEND_URL=https://your-frontend.vercel.app
+```
+
+**Frontend — create `frontend/.env`:**
+
+```
+VITE_API_URL=https://api.yourdomain.com
+```
+
+Then build:
+
+```bash
+cd frontend && npm run build
+```
+
+---
+
 ## Why a backend proxy?
 
 The API key never leaves your server. The frontend talks to `/api/*` on your own backend, which forwards requests to `data.solanatracker.io` with the key in the header. Built-in **rate-limit queue** (configurable via `API_MIN_INTERVAL_MS`) serializes all outgoing requests so you never hit 429 errors even when multiple widgets load at once.
