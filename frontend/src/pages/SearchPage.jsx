@@ -77,6 +77,17 @@ function activeFilterCount(filters) {
   return Object.entries(filters).filter(([, v]) => v !== '' && v != null).length;
 }
 
+function tokenAge(createdAt) {
+  if (!createdAt) return '—';
+  const ms = Date.now() - createdAt;
+  const minutes = Math.floor(ms / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days >= 1) return `${days}d`;
+  if (hours >= 1) return `${hours}h ${minutes % 60}m`;
+  return `${minutes}m`;
+}
+
 function totalFees(token) {
   const f = token.fees;
   if (!f) return null;
@@ -555,6 +566,7 @@ export default function SearchPage() {
               <thead>
                 <tr className="border-b border-dark-600 bg-dark-800">
                   <th className="text-left px-4 py-3 text-xs text-slate-500 font-medium">Token</th>
+                  <th className="text-right px-4 py-3 text-xs text-slate-500 font-medium">Age</th>
                   <th className="text-right px-4 py-3 text-xs text-slate-500 font-medium">Mkt Cap</th>
                   <th className="text-right px-4 py-3 text-xs text-slate-500 font-medium">Vol 24h</th>
                   <th className="text-right px-4 py-3 text-xs text-slate-500 font-medium">Total Fees</th>
@@ -568,6 +580,7 @@ export default function SearchPage() {
                   const fees = totalFees(token);
                   const vol24 = token.volume24h ?? token.volume;
                   const mcap  = token.marketCapUsd ?? token.marketCap;
+                  const age   = tokenAge(token.createdAt);
 
                   return (
                     <tr
@@ -600,6 +613,11 @@ export default function SearchPage() {
                         </div>
                       </td>
 
+                      <td className="px-4 py-3 text-right">
+                        <span className={`mono text-xs font-medium ${age.includes('m') && !age.includes('h') && !age.includes('d') ? 'text-green-400' : age.includes('h') && !age.includes('d') ? 'text-yellow-400' : 'text-slate-400'}`}>
+                          {age}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right text-slate-200 font-medium">{formatUsd(mcap)}</td>
                       <td className="px-4 py-3 text-right text-slate-300">{formatUsd(vol24)}</td>
                       <td className="px-4 py-3 text-right text-slate-300">
