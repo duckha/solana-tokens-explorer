@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { Search, Coins, Wallet, BarChart2, Trophy, TrendingUp } from 'lucide-react';
 import clsx from 'clsx';
+import TerminalSelector from './TerminalSelector';
 
 const nav = [
   { to: '/', label: 'Search', icon: Search, end: true },
@@ -40,6 +41,8 @@ export default function Layout({ children }) {
                 <span className="hidden sm:inline">{label}</span>
               </NavLink>
             ))}
+            <div className="w-px h-5 bg-dark-500 mx-1" />
+            <TerminalSelector />
           </nav>
         </div>
       </header>

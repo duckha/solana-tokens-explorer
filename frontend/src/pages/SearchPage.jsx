@@ -8,6 +8,7 @@ import { searchTokens } from '../api/client';
 import { formatUsd, formatNumber, riskLevel } from '../api/helpers';
 import Spinner from '../components/Spinner';
 import ErrorBox from '../components/ErrorBox';
+import { useTerminal } from '../contexts/TerminalContext';
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -250,10 +251,37 @@ function CopyBtn({ text }) {
   );
 }
 
+// ─── terminal link ────────────────────────────────────────────────────────────
+
+function TerminalFavicon({ src, alt }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <span className="text-[9px] font-bold leading-none">{alt[0]}</span>;
+  return <img src={src} alt={alt} className="w-3.5 h-3.5 rounded-sm" onError={() => setFailed(true)} />;
+}
+
+function TerminalLink({ mint, terminal }) {
+  return (
+    <a
+      href={terminal.url(mint)}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      title={`Open in ${terminal.label}`}
+      className={`flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs font-semibold transition-colors whitespace-nowrap
+        ${terminal.tw.bg} ${terminal.tw.border} ${terminal.tw.text}
+        hover:brightness-125`}
+    >
+      <TerminalFavicon src={terminal.favicon} alt={terminal.label} />
+      {terminal.label}
+    </a>
+  );
+}
+
 // ─── main page ────────────────────────────────────────────────────────────────
 
 export default function SearchPage() {
   const navigate = useNavigate();
+  const { terminal } = useTerminal();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [results, setResults] = useState(null);
@@ -628,16 +656,7 @@ export default function SearchPage() {
                       {/* Links */}
                       <td className="px-3 py-3">
                         <div className="flex items-center justify-center gap-2">
-                          <a
-                            href={`https://axiom.trade/t/${token.mint}?chain=sol`}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={e => e.stopPropagation()}
-                            className="text-xs font-bold text-brand-400 hover:text-brand-300 transition-colors whitespace-nowrap"
-                            title="Open in Axiom"
-                          >
-                            Axiom
-                          </a>
+                          <TerminalLink mint={token.mint} terminal={terminal} />
                         </div>
                       </td>
                     </tr>
