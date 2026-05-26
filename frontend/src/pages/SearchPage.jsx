@@ -286,6 +286,7 @@ export default function SearchPage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const debounceRef = useRef(null);
@@ -668,21 +669,22 @@ export default function SearchPage() {
 
           {results?.hasMore && (
             <button
+              disabled={loadingMore}
               onClick={() => {
                 const nextCursor = results.nextCursor;
                 if (!nextCursor) return;
-                setLoading(true);
+                setLoadingMore(true);
                 searchTokens({ ...cleanParams(query, filters), cursor: nextCursor })
                   .then(({ data }) => setResults(prev => ({
                     ...data,
                     data: [...(prev.data ?? []), ...(data.data ?? [])],
                   })))
                   .catch(e => setError(e.response?.data?.error || e.message))
-                  .finally(() => setLoading(false));
+                  .finally(() => setLoadingMore(false));
               }}
-              className="btn-ghost w-full mt-3 text-sm"
+              className="btn-ghost w-full mt-3 text-sm flex items-center justify-center gap-2"
             >
-              Load more
+              {loadingMore ? <Spinner size="sm" /> : 'Load more'}
             </button>
           )}
         </div>
